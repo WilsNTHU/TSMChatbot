@@ -8,7 +8,7 @@ import {
   recordAgentUsage
 } from "../services/agentLimits.js";
 import { chatWithOpenAI } from "../services/openai.js";
-import { buildAgentSystemPrompt, isSummaryRequest } from "../utils/agentPrompt.js";
+import { buildAgentSystemPrompt } from "../utils/agentPrompt.js";
 
 const router = Router();
 
@@ -51,14 +51,11 @@ router.post("/chat", authMiddleware, async (req, res) => {
 
     chatMessages.push({ role: "user", content: userMessage });
 
-    const system = buildAgentSystemPrompt(req.user, context, userMessage, {
-      focusRoomId: roomId || null
-    });
-    const maxTokens = isSummaryRequest(userMessage) ? 1200 : 600;
+    const system = buildAgentSystemPrompt(req.user, context, userMessage);
     const result = await chatWithOpenAI({
       system,
       messages: chatMessages,
-      maxTokens
+      maxTokens: 512
     });
 
     const { costUsd } = await recordAgentUsage(req.user.id, result.usage);

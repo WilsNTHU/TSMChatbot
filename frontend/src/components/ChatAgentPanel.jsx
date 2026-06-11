@@ -16,8 +16,7 @@ const QUICK_PROMPTS = [
     icon: FileText,
     label: "摘要所有聊天",
     labelEn: "Summarize all",
-    prompt:
-      "請摘要我所有聊天室（包含 1 對 1 與群組）的對話重點，用條列說明各聊天室最近在討論什麼、誰說了什麼。"
+    prompt: "請摘要我所有聊天室（包含 1 對 1 與群組）的對話重點，用繁體中文條列說明。"
   },
   {
     id: "summarize-room",
@@ -38,7 +37,7 @@ const QUICK_PROMPTS = [
     icon: HelpCircle,
     label: "TSMChat 說明",
     labelEn: "TSMChat help",
-    prompt: "What can TSMChat do? Explain the main features."
+    prompt: "What can TSMChat do? Explain the main features in Traditional Chinese."
   }
 ];
 
@@ -53,8 +52,6 @@ function ChatAgentPanel({
   const [loading, setLoading] = useState(false);
   const [agentEnabled, setAgentEnabled] = useState(true);
   const [agentModel, setAgentModel] = useState("");
-  const [liveSyncedAt, setLiveSyncedAt] = useState("");
-  const [liveRoomCount, setLiveRoomCount] = useState(0);
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
@@ -73,10 +70,7 @@ function ChatAgentPanel({
 
     const syncLiveSnapshot = async () => {
       try {
-        const snapshot = await fetchAgentSnapshot();
-        if (cancelled) return;
-        setLiveSyncedAt(snapshot.fetchedAt || "");
-        setLiveRoomCount(snapshot.roomCount || 0);
+        await fetchAgentSnapshot();
       } catch (err) {
         console.debug("Agent live snapshot skipped:", err.message);
       }
@@ -153,8 +147,7 @@ function ChatAgentPanel({
               <div className="min-w-0">
                 <h2 className="font-bold text-gray-900 text-sm">Chat Agent</h2>
                 <p className="text-[10px] text-gray-500 truncate">
-                  {agentModel || "gpt-4.1-nano"} · Live · {liveRoomCount} rooms
-                  {liveSyncedAt ? ` · ${new Date(liveSyncedAt).toLocaleTimeString()}` : ""}
+                  {agentModel || "gpt-4.1-nano"} · 所有聊天室 · 繁中 / English
                 </p>
               </div>
             </div>
@@ -194,7 +187,7 @@ function ChatAgentPanel({
                 你好，{currentUser.name?.split(" ")[0] || "there"}！
               </p>
               <p className="text-xs text-gray-400 mb-4 px-4">
-                即時讀取你所有的 1 對 1 與群組聊天（每秒同步），可摘要、翻譯或回答最新訊息相關問題。
+                可讀取你所有的 1 對 1 與群組聊天，摘要、翻譯或回答任何問題。
                 {selectedRoom ? ` 目前開啟：${selectedRoom.name}` : ""}
               </p>
 
@@ -264,7 +257,7 @@ function ChatAgentPanel({
                   handleSend(input);
                 }
               }}
-              placeholder="詢問所有聊天室、摘要、翻譯… / Ask about any chat"
+              placeholder="詢問摘要、翻譯或 TSMChat 問題… / Ask anything"
               rows={2}
               disabled={loading || !agentEnabled}
               className="flex-1 resize-none bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent disabled:opacity-50"
